@@ -39,6 +39,13 @@ VOLUMES="$VOLUMES -v {{ client.auth.path|default('/var/www') }}:{{ client.auth.p
 VOLUMES="$VOLUMES -v {{ domain.auth.path|default('/var/www') }}:{{ domain.auth.path|default('/var/www') }}"
 {%- endif %}
 {%- endfor %}
+{%- if client.hook %}
+VOLUMES="$VOLUMES -v /etc/letsencrypt/custom-hooks/deploy-hook:/etc/letsencrypt/custom-hooks/deploy-hook
+{%- endif %}
+{%- if client.auth.method == 'manual' %}
+VOLUMES="$VOLUMES -v /etc/letsencrypt/custom-hooks/manual-auth-hook:/etc/letsencrypt/custom-hooks/manual-auth-hook
+VOLUMES="$VOLUMES -v /etc/letsencrypt/custom-hooks/manual-cleanup-hook:/etc/letsencrypt/custom-hooks/manual-cleanup-hook
+{%- endif -%}
 
 # Only allocate tty if we detect one
 if [ -t 1 ]; then

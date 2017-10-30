@@ -25,17 +25,22 @@ certbot_{{ domain }}:
     - name: >
         certbot certonly {{ staging }} --non-interactive --agree-tos --no-self-upgrade --email {{ params.email|default(client.email) }}
         {%- if auth.method == 'standalone' %}
-        --standalone --standalone-supported-challenges {{ auth.type }} --http-01-port {{ auth.port }}
+        --standalone --preferred-challenges {{ auth.type }} --http-01-port {{ auth.port }}
         {%- elif auth.method == 'webroot' %}
         --webroot --webroot-path {{ auth.path }}
         {%- elif auth.method in ['apache', 'nginx'] %}
         --{{ auth.method }}
+        {%- elif auth.method == 'manual' %}
+        --manual --manual-public-ip-logging-ok --preferred-challenges {{ auth.type }} --manual-auth-hook /etc/letsencrypt/custom-hooks/manual-auth-hook --manual-cleanup-hook /etc/letsencrypt/custom-hooks/manual-cleanup-hook
         {%- endif %}
         -d {{ main_domain }}
         {%- for d in params.get('names', []) %}
         -d {{ d }}
         {%- endfor %}
         --expand
+        {%- if client.hook %}
+        --deploy-hook /etc/letsencrypt/custom-hooks/deploy-hook
+        {%- endif %}
     {#- Check if there are missing cert file or it has missing domains, to (re)issue certificate. #}
     {#- Please note only expanding certificate (adding domains) works. #}
     - unless: test -e "{{ cert_path }}" && openssl x509 -text -in "{{ cert_path }}" | fgrep -q -e"{{ subject_alternative_names }}"
