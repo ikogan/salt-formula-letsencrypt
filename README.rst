@@ -136,6 +136,24 @@ installation serving directory for all sites):
           www.dummy.org:
             enabled: true
 
+Manual authentication with hooks is available for fully custom setups:
+
+.. code-block:: yaml
+
+    letsencrypt:
+      client:
+        auth:
+          method: manual
+          type: dns
+          hooks: 
+            auth: salt://base/files/letsencrypt/dns-auth-hook.sh
+            cleanup: salt://base/files/letsencrypt/dns-cleanup-hook.sh
+        domain:
+          dummy.org:
+            enabled: true
+          www.dummy.org:
+            enabled: true
+
 It's also possible to override auth method or other options only for single
 domain:
 
@@ -191,6 +209,16 @@ You are able to use multidomain certificates:
             - awk.opensource-expert.com
             - www.awk.opensource-expert.com
 
+You can use a deploy hook to customize where certificates
+go:
+
+.. code-block:: yaml
+
+    letsencrypt:
+      client:
+        auth: apache
+        hook: salt://base/files/letsencrypt/setup-letsencrypt-certificate.sh
+        
 Legacy configuration
 --------------------
 
